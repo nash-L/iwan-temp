@@ -196,14 +196,16 @@ class Router
                     $response->setTemplate(preg_replace('/^' . strtr($namespace, ['\\' => '\\\\']) . '/', '', $file));
                 }
                 return $routeInfo;
-            case Dispatcher::METHOD_NOT_ALLOWED: return [function ($method) use ($request, $response) {
-                $response->assign('method', $request->server->get('REQUEST_METHOD'));
-                $response->assign('allowed_method', $method);
-                $response->setStatusCode(405);
-            }, ['method' => $routeInfo[0][0]]];
-            case Dispatcher::NOT_FOUND: return [function () use ($response) {
-                $response->setStatusCode(400);
-            }];
+            case Dispatcher::METHOD_NOT_ALLOWED:
+                return [function ($method) use ($request, $response) {
+                    $response->assign('method', $request->server->get('REQUEST_METHOD'));
+                    $response->assign('allowed_method', $method);
+                    $response->setStatusCode(405);
+                }, ['method' => $routeInfo[0][0]]];
+            case Dispatcher::NOT_FOUND:
+                return [function () use ($response) {
+                    $response->setStatusCode(400);
+                }];
         }
         return [function () use ($response) {
             $response->setStatusCode(400);
