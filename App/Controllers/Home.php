@@ -11,12 +11,11 @@ class Home
 {
     /**
      * Home constructor.
-     * @param Response $response
      * @throws ResponseThrowable
      */
-    public function __construct(Response $response)
+    public function __construct()
     {
-//        throw new ResponseThrowable('message', 401);
+        throw new ResponseThrowable('message', 401);
     }
 
     public function test(Response $response)

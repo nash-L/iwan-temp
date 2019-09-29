@@ -81,6 +81,14 @@ class Response extends \Symfony\Component\HttpFoundation\Response
         switch ($this->format) {
             case 'raw':
                 return parent::send();
+            case 'html': case 'htm':
+                try {
+                    $this->setContent($this->htmlEngine->loadTemplate($this->htmlTemplate)->render($this->data['result']))
+                        ->headers->set('Content-Type', 'text/html;charset=utf-8');
+                    break;
+                } catch (Exception $e) {
+                    $this->format = 'json';
+                }
             case 'json':
                 $this->setContent(json_encode($this->data))
                     ->headers->set('Content-Type', 'application/json;charset=utf-8');
@@ -88,15 +96,6 @@ class Response extends \Symfony\Component\HttpFoundation\Response
             case 'xml':
                 $this->setContent(Array2XML::createXML('root', $this->data)->saveXML())
                     ->headers->set('Content-Type', 'text/xml;charset=utf-8');
-                break;
-            case 'html':
-                try {
-                    $this->setContent($this->htmlEngine->loadTemplate($this->htmlTemplate)->render($this->data['result']))
-                        ->headers->set('Content-Type', 'text/html;charset=utf-8');
-                } catch (Exception $e) {
-                    $this->setContent(json_encode($this->data))
-                        ->headers->set('Content-Type', 'application/json;charset=utf-8');
-                }
                 break;
         }
         return parent::send();
