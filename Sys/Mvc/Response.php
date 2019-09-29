@@ -5,6 +5,8 @@ namespace Sys\Mvc;
 use LSS\Array2XML;
 use stdClass;
 use Mustache_Engine;
+use Symfony\Component\HttpFoundation\ResponseHeaderBag;
+use Exception;
 
 class Response extends \Symfony\Component\HttpFoundation\Response
 {
@@ -52,7 +54,7 @@ class Response extends \Symfony\Component\HttpFoundation\Response
      */
     public function setHeaders(array $headers)
     {
-        $this->headers = $headers;
+        $this->headers = new ResponseHeaderBag($headers);
     }
 
     /**
@@ -88,8 +90,13 @@ class Response extends \Symfony\Component\HttpFoundation\Response
                     ->headers->set('Content-Type', 'text/xml;charset=utf-8');
                 break;
             case 'html':
-                $this->setContent($this->htmlEngine->loadTemplate($this->htmlTemplate)->render($this->data['result']))
-                    ->headers->set('Content-Type', 'text/html;charset=utf-8');
+                try {
+                    $this->setContent($this->htmlEngine->loadTemplate($this->htmlTemplate)->render($this->data['result']))
+                        ->headers->set('Content-Type', 'text/html;charset=utf-8');
+                } catch (Exception $e) {
+                    $this->setContent(json_encode($this->data))
+                        ->headers->set('Content-Type', 'application/json;charset=utf-8');
+                }
                 break;
         }
         return parent::send();

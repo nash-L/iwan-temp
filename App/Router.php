@@ -4,6 +4,7 @@
 namespace App;
 
 
+use App\Controllers\Home;
 use Sys\Mvc\Request;
 use Sys\Mvc\Response;
 
@@ -16,6 +17,7 @@ class Router extends \Sys\Router
                 $response->assign('id', 123);
                 $response->setTemplate('index');
             });
+            $this->get('/test', [Home::class, 'test']);
         });
     }
 }

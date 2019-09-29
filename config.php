@@ -2,6 +2,7 @@
 use App\Router;
 return [
     'router_class' => Router::class,
+    'controller_namespace' => 'App\\Controllers\\',
     'html_engine' => [
         'template_class_prefix' => '_Tpl_',
         'cache' => ROOT . '/runtime/cache/views',

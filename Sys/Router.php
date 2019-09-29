@@ -6,6 +6,7 @@ use FastRoute\RouteCollector;
 use Sys\Mvc\Request;
 use function FastRoute\simpleDispatcher;
 use Sys\Mvc\Response;
+use Auryn\InjectionException;
 
 class Router
 {
@@ -156,9 +157,11 @@ class Router
     /**
      * @param Request $request
      * @param Response $response
+     * @param Application $application
      * @return array
+     * @throws InjectionException
      */
-    final public static function route(Request $request, Response $response)
+    final public static function route(Request $request, Response $response, Application $application)
     {
         $dispatcher = simpleDispatcher(function (RouteCollector $r) use ($request) {
             $router = new static($r);
@@ -171,24 +174,36 @@ class Router
             $request->server->get('REQUEST_METHOD'),
             rawurldecode($uri)
         );
-        return self::getRouteResult($routeInfo, $request, $response);
+        return self::getRouteResult($routeInfo, $request, $response, $application);
     }
 
     /**
      * @param array $routeInfo
      * @param Request $request
      * @param Response $response
+     * @param Application $application
      * @return array
+     * @throws InjectionException
      */
-    final private static function getRouteResult(array $routeInfo, Request $request, Response $response)
+    final private static function getRouteResult(array $routeInfo, Request $request, Response $response, Application $application)
     {
         switch (array_shift($routeInfo)) {
-            case Dispatcher::FOUND: return $routeInfo;
+            case Dispatcher::FOUND:
+                if (is_string($routeInfo[0][0]) && class_exists($routeInfo[0][0])) {
+                    $file = $routeInfo[0][0] . '/' . $routeInfo[0][1];
+                    $routeInfo[0][0] = $application->make($routeInfo[0][0]);
+                    $namespace = $application->make(Config::class)->get('controller_namespace');
+                    $response->setTemplate(preg_replace('/^' . strtr($namespace, ['\\' => '\\\\']) . '/', '', $file));
+                }
+                return $routeInfo;
             case Dispatcher::METHOD_NOT_ALLOWED: return [function ($method) use ($request, $response) {
                 $response->assign('method', $request->server->get('REQUEST_METHOD'));
                 $response->assign('allowed_method', $method);
                 $response->setStatusCode(405);
             }, ['method' => $routeInfo[0][0]]];
+            case Dispatcher::NOT_FOUND: return [function () use ($response) {
+                $response->setStatusCode(400);
+            }];
         }
         return [function () use ($response) {
             $response->setStatusCode(400);

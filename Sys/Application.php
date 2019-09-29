@@ -48,9 +48,9 @@ class Application extends Injector
         }
         $routeResult = $this->execute([$router_class, 'route']);
         $result = $this->execute(...$routeResult);
-        if ($result instanceof \Symfony\Component\HttpFoundation\Response) {
-            $this->make(Response::class)
-                ->setFormat('raw')
+        $response = $this->make(Response::class);
+        if ($result instanceof \Symfony\Component\HttpFoundation\Response && $result !== $response) {
+            $response->setFormat('raw')
                 ->setContent($result->getContent())
                 ->setHeaders($result->headers->all());
         }
