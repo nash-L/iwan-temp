@@ -75,8 +75,11 @@ class Response extends \Symfony\Component\HttpFoundation\Response
      */
     public function send()
     {
-        if (empty($this->data['result'])) {
+        if (empty($this->data['result']) && $this->format !== 'xml') {
             $this->data['result'] = new stdClass();
+        }
+        if ($this->getStatusCode() !== 200) {
+            $this->htmlTemplate = 'errors/' . strval($this->getStatusCode());
         }
         switch ($this->format) {
             case 'raw':
