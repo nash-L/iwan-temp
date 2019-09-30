@@ -216,6 +216,10 @@ class Router
         $uriArr = array_filter(explode('/', $uri));
         $namespace = Application::instance()->make(Config::class)->get('controller_namespace');
         $default_controller_name = Application::instance()->make(Config::class)->get('default_controller_name');
+        $default_action_name = Application::instance()->make(Config::class)->get('default_action_name');
+        if (empty($uriArr)) {
+            return [[$namespace . $default_controller_name, $default_action_name], []];
+        }
         $result = [[], []];
         while ($uriItem = array_shift($uriArr)) {
             $valArr = array_map(function ($item) { return ucfirst($item); }, explode('-', $uriItem));
@@ -223,14 +227,12 @@ class Router
             $namespace .= $uriItem;
             if (class_exists($namespace)) {
                 $result[0][0] = $namespace;
-            } elseif (class_exists($namespace . '\\' . $default_controller_name)) {
-                $result[0][0] = $namespace . '\\' . $default_controller_name;
             } else {
                 $namespace .= '\\';
                 continue;
             }
             if (empty($result[0][1] = array_shift($uriArr))) {
-                $result[0][1] = Application::instance()->make(Config::class)->get('default_action_name');
+                $result[0][1] = $default_action_name;
             }
             if (!method_exists(...$result[0])) {
                 return [];

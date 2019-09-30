@@ -15,11 +15,12 @@ class Home
      */
     public function __construct()
     {
-        throw new ResponseThrowable('message', 401);
+//        throw new ResponseThrowable('message', 401);
     }
 
     public function index(Response $response)
     {
         $response->assign('id', 12);
+        $response->setTemplate('Home/test');
     }
 }
