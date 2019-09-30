@@ -13,9 +13,6 @@
         "mustache/mustache": "^2.12"
     },
     "autoload": {
-        "files": [
-            "boot.php"
-        ],
         "psr-4": {
             "App\\": "App/",
             "Sys\\": "Sys/"
