@@ -20,5 +20,11 @@
             "App\\": "App/",
             "Sys\\": "Sys/"
         }
+    },
+    "repositories": {
+        "packagist": {
+            "type": "composer",
+            "url": "https://mirrors.aliyun.com/composer/"
+        }
     }
 }
