@@ -3,6 +3,8 @@ use App\Router;
 return [
     'router_class' => Router::class,
     'controller_namespace' => 'App\\Controllers\\',
+    'default_controller_name' => 'Home',
+    'default_action_name' => 'index',
     'html_engine' => [
         'delimiters' => '<!--{ }-->',
         'template_class_prefix' => '_Tpl_',

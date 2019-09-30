@@ -10,6 +10,13 @@ use Mustache_Engine;
 
 class Application extends Injector
 {
+    private static $application = null;
+
+    public static function instance()
+    {
+        return self::$application;
+    }
+
     /**
      * Application constructor.
      * @param Request $request
@@ -19,6 +26,7 @@ class Application extends Injector
     public function __construct(Request $request, Response $response)
     {
         parent::__construct(null);
+        self::$application = $this;
         $this->share($this);
         $this->share($request);
         $this->share($response);

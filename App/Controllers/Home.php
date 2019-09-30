@@ -18,7 +18,7 @@ class Home
         throw new ResponseThrowable('message', 401);
     }
 
-    public function test(Response $response)
+    public function index(Response $response)
     {
         $response->assign('id', 12);
     }

@@ -157,11 +157,10 @@ class Router
     /**
      * @param Request $request
      * @param Response $response
-     * @param Application $application
      * @return array
      * @throws InjectionException
      */
-    final public static function route(Request $request, Response $response, Application $application)
+    final public static function route(Request $request, Response $response)
     {
         $dispatcher = simpleDispatcher(function (RouteCollector $r) use ($request) {
             $router = new static($r);
@@ -172,27 +171,31 @@ class Router
         $response->setFormat($suffix);
         $routeInfo = $dispatcher->dispatch(
             $request->server->get('REQUEST_METHOD'),
-            rawurldecode($uri)
+            $uri = rawurldecode($uri)
         );
-        return self::getRouteResult($routeInfo, $request, $response, $application);
+        return self::getRouteResult($routeInfo, $request, $response, $uri);
     }
 
     /**
      * @param array $routeInfo
      * @param Request $request
      * @param Response $response
-     * @param Application $application
+     * @param string $uri
      * @return array
      * @throws InjectionException
      */
-    final private static function getRouteResult(array $routeInfo, Request $request, Response $response, Application $application)
+    final private static function getRouteResult(array $routeInfo, Request $request, Response $response, string $uri)
     {
         switch (array_shift($routeInfo)) {
+            case Dispatcher::NOT_FOUND:
+                if (empty($routeInfo = self::decodeUri($uri))) {
+                    break;
+                }
             case Dispatcher::FOUND:
                 if (is_string($routeInfo[0][0]) && class_exists($routeInfo[0][0])) {
                     $file = $routeInfo[0][0] . '/' . $routeInfo[0][1];
-                    $routeInfo[0][0] = $application->make($routeInfo[0][0]);
-                    $namespace = $application->make(Config::class)->get('controller_namespace');
+                    $routeInfo[0][0] = Application::instance()->make($routeInfo[0][0]);
+                    $namespace = Application::instance()->make(Config::class)->get('controller_namespace');
                     $response->setTemplate(preg_replace('/^' . strtr($namespace, ['\\' => '\\\\']) . '/', '', $file));
                 }
                 return $routeInfo;
@@ -202,13 +205,41 @@ class Router
                     $response->assign('allowed_method', $method);
                     $response->setStatusCode(405);
                 }, ['method' => $routeInfo[0][0]]];
-            case Dispatcher::NOT_FOUND:
-                return [function () use ($response) {
-                    $response->setStatusCode(400);
-                }];
         }
         return [function () use ($response) {
-            $response->setStatusCode(400);
+            $response->setStatusCode(404);
         }];
+    }
+
+    final private static function decodeUri(string $uri)
+    {
+        $uriArr = array_filter(explode('/', $uri));
+        $namespace = Application::instance()->make(Config::class)->get('controller_namespace');
+        $default_controller_name = Application::instance()->make(Config::class)->get('default_controller_name');
+        $result = [[], []];
+        while ($uriItem = array_shift($uriArr)) {
+            $valArr = array_map(function ($item) { return ucfirst($item); }, explode('-', $uriItem));
+            $uriItem = implode('', $valArr);
+            $namespace .= $uriItem;
+            if (class_exists($namespace)) {
+                $result[0][0] = $namespace;
+            } elseif (class_exists($namespace . '\\' . $default_controller_name)) {
+                $result[0][0] = $namespace . '\\' . $default_controller_name;
+            } else {
+                $namespace .= '\\';
+                continue;
+            }
+            if (empty($result[0][1] = array_shift($uriArr))) {
+                $result[0][1] = Application::instance()->make(Config::class)->get('default_action_name');
+            }
+            if (!method_exists(...$result[0])) {
+                return [];
+            }
+            while ($k = array_shift($uriArr)) {
+                $result[1][$k] = array_shift($uriArr) ?? '';
+            }
+            return $result;
+        }
+        return [];
     }
 }
