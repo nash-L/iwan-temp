@@ -26,7 +26,7 @@ return [
     ],
     /**
      * Medoo
-     * https://medoo.lvtao.net/1.2/doc.php
+     * https://medoo.in/api/where
      */
     'database' => [
         'default_database' => 'development',
