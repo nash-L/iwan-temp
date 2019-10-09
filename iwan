@@ -2,6 +2,7 @@
 <?php
 require __DIR__ . '/vendor/autoload.php';
 $config = require __DIR__ . '/config.php';
+makeDir($config['runtime_dir']);
 $migrate_config_file = $config['runtime_dir'] . '/migrate.json';
 $command = __DIR__ . "/vendor/bin/phinx";
 $arr = $argv;
@@ -58,6 +59,17 @@ function exchange (array $conf) {
     isset($conf['collation']) && $conf['collation'] && $result['collation'] = $conf['collation'];
     isset($conf['prefix']) && $conf['prefix'] && $result['table_prefix'] = $conf['prefix'];
     return $result;
+}
+function makeDir (string $dir) {
+    $dirArr = array_filter(explode('/', $dir));
+    $dir = '/';
+    foreach ($dirArr as $subDir) {
+        $dir .= $subDir;
+        if (!is_dir($dir)) {
+            mkdir($dir);
+        }
+        $dir .= '/';
+    }
 }
 $migrate_config = $config['migrate'];
 $migrate_config['environments'] = $config['database'];

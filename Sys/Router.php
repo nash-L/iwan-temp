@@ -11,6 +11,16 @@ use Auryn\InjectionException;
 class Router
 {
     /**
+     * @var string
+     */
+    private $controllerName;
+
+    /**
+     * @var string
+     */
+    private $methodName;
+
+    /**
      * @var RouteCollector
      */
     protected $routeCollector;
@@ -21,6 +31,38 @@ class Router
      */
     public function define(Request $request)
     {}
+
+    /**
+     * @return string
+     */
+    public function getMethodName(): string
+    {
+        return $this->methodName;
+    }
+
+    /**
+     * @return string
+     */
+    public function getControllerName(): string
+    {
+        return $this->controllerName;
+    }
+
+    /**
+     * @param string $methodName
+     */
+    public function setMethodName(string $methodName): void
+    {
+        $this->methodName = $methodName;
+    }
+
+    /**
+     * @param string $controllerName
+     */
+    public function setControllerName(string $controllerName): void
+    {
+        $this->controllerName = $controllerName;
+    }
 
     /**
      * Router constructor.
@@ -163,8 +205,8 @@ class Router
     final public static function route(Request $request, Response $response)
     {
         $dispatcher = simpleDispatcher(function (RouteCollector $r) use ($request) {
-            $router = new static($r);
-            $router->define($request);
+            $request->router = new static($r);
+            $request->router->define($request);
         });
         $pathInfo = explode('?', $request->server->get('REQUEST_URI'))[0];
         list($uri, $suffix) = explode('.', $pathInfo . '.html');
@@ -193,6 +235,8 @@ class Router
                 }
             case Dispatcher::FOUND:
                 if (is_string($routeInfo[0][0]) && class_exists($routeInfo[0][0])) {
+                    $request->router->setControllerName($routeInfo[0][0]);
+                    $request->router->setMethodName($routeInfo[0][1]);
                     $file = $routeInfo[0][0] . '/' . $routeInfo[0][1];
                     $routeInfo[0][0] = Application::instance()->make($routeInfo[0][0]);
                     $namespace = Application::instance()->make(Config::class)->get('controller_namespace');
