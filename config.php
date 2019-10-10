@@ -11,6 +11,11 @@ return [
     'default_action_name' => 'index',
     'runtime_dir' => ROOT . '/runtime',
     'catch_dir' => ROOT . '/runtime/cache',
+    'cors' => [
+        'origin' => '*',
+        'methods' => 'PATCH,GET,POST,PUT,DELETE',
+        'headers' => 'Authorization'
+    ],
     /**
      * Phinx
      * http://docs.phinx.org/en/latest/install.html

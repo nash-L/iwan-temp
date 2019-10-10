@@ -7,6 +7,9 @@ use stdClass;
 use Mustache_Engine;
 use Symfony\Component\HttpFoundation\ResponseHeaderBag;
 use Exception;
+use Sys\Application;
+use Sys\Config;
+use Auryn\InjectionException;
 
 class Response extends \Symfony\Component\HttpFoundation\Response
 {
@@ -72,6 +75,7 @@ class Response extends \Symfony\Component\HttpFoundation\Response
 
     /**
      * @return \Symfony\Component\HttpFoundation\Response
+     * @throws InjectionException
      */
     public function send()
     {
@@ -93,12 +97,18 @@ class Response extends \Symfony\Component\HttpFoundation\Response
                     $this->format = 'json';
                 }
             case 'json':
-                $this->setContent(json_encode($this->data))
-                    ->headers->set('Content-Type', 'application/json;charset=utf-8');
+                $this->setContent(json_encode($this->data));
+                $this->headers->set('Content-Type', 'application/json;charset=utf-8');
+                $this->headers->set('Access-Control-Allow-Origin', Application::instance()->make(Config::class)->get('cors.origin'));
+                $this->headers->set('Access-Control-Allow-Methods', Application::instance()->make(Config::class)->get('cors.methods'));
+                $this->headers->set('Access-Control-Allow-Headers', Application::instance()->make(Config::class)->get('cors.headers'));
                 break;
             case 'xml':
-                $this->setContent(Array2XML::createXML('root', $this->data)->saveXML())
-                    ->headers->set('Content-Type', 'text/xml;charset=utf-8');
+                $this->setContent(Array2XML::createXML('root', $this->data)->saveXML());
+                $this->headers->set('Content-Type', 'text/xml;charset=utf-8');
+                $this->headers->set('Access-Control-Allow-Origin', Application::instance()->make(Config::class)->get('cors.origin'));
+                $this->headers->set('Access-Control-Allow-Methods', Application::instance()->make(Config::class)->get('cors.methods'));
+                $this->headers->set('Access-Control-Allow-Headers', Application::instance()->make(Config::class)->get('cors.headers'));
                 break;
         }
         return parent::send();

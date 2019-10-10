@@ -204,6 +204,12 @@ class Router
      */
     final public static function route(Request $request, Response $response)
     {
+        $method = $request->server->get('REQUEST_METHOD');
+        if ($method === 'OPTIONS') {
+            return [function () use ($response) {
+                $response->setStatusCode(200);
+            }];
+        }
         $dispatcher = simpleDispatcher(function (RouteCollector $r) use ($request) {
             $request->router = new static($r);
             $request->router->define($request);
@@ -212,7 +218,7 @@ class Router
         list($uri, $suffix) = explode('.', $pathInfo . '.html');
         $response->setFormat($suffix);
         $routeInfo = $dispatcher->dispatch(
-            $request->server->get('REQUEST_METHOD'),
+            $method,
             $uri = rawurldecode($uri)
         );
         return self::getRouteResult($routeInfo, $request, $response, $uri);
