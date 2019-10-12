@@ -99,18 +99,15 @@ class Response extends \Symfony\Component\HttpFoundation\Response
             case 'json':
                 $this->setContent(json_encode($this->data));
                 $this->headers->set('Content-Type', 'application/json;charset=utf-8');
-                $this->headers->set('Access-Control-Allow-Origin', Application::instance()->make(Config::class)->get('cors.origin'));
-                $this->headers->set('Access-Control-Allow-Methods', Application::instance()->make(Config::class)->get('cors.methods'));
-                $this->headers->set('Access-Control-Allow-Headers', Application::instance()->make(Config::class)->get('cors.headers'));
                 break;
             case 'xml':
                 $this->setContent(Array2XML::createXML('root', $this->data)->saveXML());
                 $this->headers->set('Content-Type', 'text/xml;charset=utf-8');
-                $this->headers->set('Access-Control-Allow-Origin', Application::instance()->make(Config::class)->get('cors.origin'));
-                $this->headers->set('Access-Control-Allow-Methods', Application::instance()->make(Config::class)->get('cors.methods'));
-                $this->headers->set('Access-Control-Allow-Headers', Application::instance()->make(Config::class)->get('cors.headers'));
                 break;
         }
+        $this->headers->set('Access-Control-Allow-Origin', Application::instance()->make(Config::class)->get('cors.origin'));
+        $this->headers->set('Access-Control-Allow-Methods', Application::instance()->make(Config::class)->get('cors.methods'));
+        $this->headers->set('Access-Control-Allow-Headers', Application::instance()->make(Config::class)->get('cors.headers'));
         return parent::send();
     }
 
