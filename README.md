@@ -38,7 +38,7 @@ composer install
 ### 数据模型
 ```php
 <?php
-#数据迁移库使用Medoo，请参考文档：https://medoo.in/api/where
+#数据操作使用Medoo，请参考文档：https://medoo.in/api/where
 
 # 模型定义
 namespace App\Models;
