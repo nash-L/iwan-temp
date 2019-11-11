@@ -4,10 +4,7 @@
 # 获取docker的composer镜像
 docker pull composer
 
-# 安装composer库（首次安装）
-docker run -it -v --name composer $PWD:/app --privileged=true composer composer install
-
-# 安装composer库（非首次安装）
+# 安装composer库
 docker run -it -v $PWD:/app --privileged=true composer composer install
 ```
 ### web服务器环境安装
