@@ -44,6 +44,16 @@ abstract class Database
     }
 
     /**
+     * @param string $string
+     * @return false|string
+     * @throws InjectionException
+     */
+    public static function quote(string $string)
+    {
+        return self::getMedoo()->quote($string);
+    }
+
+    /**
      * @param callable $call
      * @return bool
      * @throws InjectionException

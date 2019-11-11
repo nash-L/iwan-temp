@@ -284,6 +284,8 @@ class Router
             if (empty($result[0][1] = array_shift($uriArr))) {
                 $result[0][1] = $default_action_name;
             }
+            $actionArr = array_map(function ($item) { return ucfirst($item); }, explode('-', $result[0][1]));
+            $result[0][1] = lcfirst(implode('', $actionArr));
             if (!method_exists(...$result[0])) {
                 return [];
             }

@@ -6,7 +6,9 @@ defined('ROOT') || define('ROOT', realpath(__DIR__));
 
 return [
     'router_class' => Router::class,
+//    'console_class' => Router::class,
     'controller_namespace' => 'App\\Controllers\\',
+    'command_namespace' => 'App\\Commands\\',
     'default_controller_name' => 'Home',
     'default_action_name' => 'index',
     'runtime_dir' => ROOT . '/runtime',
@@ -48,11 +50,24 @@ return [
             'collation' => 'utf8mb4_general_ci',
             # 'prefix' => 'production_'
         ],
+        'docker' => [
+            // 必须参数
+            'database_type' => 'mysql',
+            'server' => 'mysql',
+            'database_name' => 'dc_development',
+            'username' => 'root',
+            'password' => 'root',
+            // 非必须参数
+            'port' => 3306,
+            'charset' => 'utf8mb4',
+            'collation' => 'utf8mb4_general_ci',
+            # 'prefix' => 'development_'
+        ],
         'development' => [
             // 必须参数
             'database_type' => 'mysql',
-            'server' => 'localhost',
-            'database_name' => 'development_db',
+            'server' => '127.0.0.1',
+            'database_name' => 'dc_development',
             'username' => 'root',
             'password' => 'root',
             // 非必须参数

@@ -1,84 +1,26 @@
 #!/usr/bin/env php
 <?php
-require __DIR__ . '/vendor/autoload.php';
-$config = require __DIR__ . '/config.php';
-makeDir($config['runtime_dir']);
-$migrate_config_file = $config['runtime_dir'] . '/migrate.json';
-$command = __DIR__ . "/vendor/bin/phinx";
-$arr = $argv;
-$len = count($arr);
-for ($k = 1; $k < $len; $k++) {
-    if ($arr[$k] === '-c' || $arr[$k] === '--configuration') {
-        $arr[$k+1] = '';
-        continue;
-    }
-    if (empty($arr[$k])) {
-        continue;
-    }
-    $command .= ' ' . $arr[$k];
+use Sys\Application;
+use Sys\Config;
+
+defined('ROOT') || define('ROOT', realpath(__DIR__));
+
+require ROOT . '/vendor/autoload.php';
+
+try {
+    $application = new Application();
+    $application->console(new Config(ROOT . '/config.php'));
+} catch (Throwable $e) {
 }
-function exchange (array $conf) {
-    $result = ['adapter' => ''];
-    switch ($conf['database_type']) {
-        case 'sqlite':
-            $result = [
-                'adapter' => 'sqlite',
-            ];
-            if ($conf['database_file'] === ':memory:') {
-                $result['memory'] = true;
-            } else {
-                $arr = explode('.', $conf['database_file']);
-                $result['name'] = $arr[0];
-                $result['suffix'] = isset($arr[1]) ? ".{$arr[1]}" : '';
-            }
-            return $result;
-        case 'mariadb': case 'mysql':
-            $result['adapter'] = 'mysql';
-            break;
-        case 'mssql':
-            $result['adapter'] = 'sqlsrv';
-            break;
-        case 'pgsql':
-            $result['adapter'] = 'pgsql';
-            break;
-        case 'oracle':
-            echo '暂不支持oracle数据库迁移', PHP_EOL;
-            exit;
-        case 'sybase':
-            echo '暂不支持sybase数据库迁移', PHP_EOL;
-            exit;
-    }
-    $result = array_merge($result, [
-        'host' => $conf['server'],
-        'name' => $conf['database_name'],
-        'user' => $conf['username'],
-        'pass' => $conf['password']
-    ]);
-    isset($conf['port']) && $conf['port'] && $result['port'] = $conf['port'];
-    isset($conf['charset']) && $conf['charset'] && $result['charset'] = $conf['charset'];
-    isset($conf['collation']) && $conf['collation'] && $result['collation'] = $conf['collation'];
-    isset($conf['prefix']) && $conf['prefix'] && $result['table_prefix'] = $conf['prefix'];
-    return $result;
-}
-function makeDir (string $dir) {
-    $dirArr = array_filter(explode('/', $dir));
-    $dir = '/';
-    foreach ($dirArr as $subDir) {
-        $dir .= $subDir;
-        if (!is_dir($dir)) {
-            mkdir($dir);
-        }
-        $dir .= '/';
-    }
-}
-$migrate_config = $config['migrate'];
-$migrate_config['environments'] = $config['database'];
-foreach ($migrate_config['environments'] as $k => $v) {
-    if ($k === 'default_database') { continue; }
-    $migrate_config['environments'][$k] = exchange($v);
-}
-$migrate_config['environments']['default_migration_table'] = $migrate_config['default_migration_table'];
-unset($migrate_config['default_migration_table']);
-file_put_contents($migrate_config_file, json_encode($migrate_config));
-$command .= " -c {$migrate_config_file}";
-passthru($command);
+
+//use Symfony\Component\Console\Application;
+//
+//use Phinx\Console\PhinxApplication;
+//
+//$application = new PhinxApplication();
+
+//$application = new Application();
+
+// ... register commands
+
+//$application->run();

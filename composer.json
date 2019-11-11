@@ -11,7 +11,10 @@
         "rdlowrey/auryn": "^1.4",
         "hassankhan/config": "^2.1",
         "openlss/lib-array2xml": "^1.0",
-        "mustache/mustache": "^2.12"
+        "mustache/mustache": "^2.12",
+        "symfony/console": "^4.3",
+        "guzzlehttp/guzzle": "^6.3",
+        "jaeger/querylist": "^4.1"
     },
     "autoload": {
         "psr-4": {

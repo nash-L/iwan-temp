@@ -8,8 +8,8 @@ use Sys\Throwable\Mvc\ResponseThrowable;
 $request = Request::createFromGlobals();
 $response = Response::create();
 try {
-    $application = new Application($request, $response);
-    $application->dispatch(new Config(ROOT . '/config.php'));
+    $application = new Application();
+    $application->dispatch($request, $response, new Config(ROOT . '/config.php'));
 } catch (ResponseThrowable $e) {
     $response->setStatusCode($e->getCode(), $e->getMessage())->setContent(json_encode([
         'code' => $e->getCode(),

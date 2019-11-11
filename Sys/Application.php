@@ -7,6 +7,7 @@ use Sys\Mvc\Request;
 use Sys\Mvc\Response;
 use Auryn\InjectionException;
 use Mustache_Engine;
+use Exception;
 
 class Application extends Injector
 {
@@ -19,30 +20,52 @@ class Application extends Injector
 
     /**
      * Application constructor.
-     * @param Request $request
-     * @param Response $response
      * @throws ConfigException
      */
-    public function __construct(Request $request, Response $response)
+    public function __construct()
     {
         parent::__construct(null);
         self::$application = $this;
         $this->share($this);
-        $this->share($request);
-        $this->share($response);
     }
 
     /**
+     * @param Request $request
+     * @param Response $response
      * @param Config $config
      * @throws ConfigException
      * @throws InjectionException
      */
-    public function dispatch(Config $config)
+    public function dispatch(Request $request, Response $response, Config $config)
     {
         $this->share($config);
+        $this->share($request);
+        $this->share($response);
         $this->make(Response::class)
             ->setEngine(new Mustache_Engine($config->get('html_engine')));
         $this->executeRouter($config->get('router_class'));
+    }
+
+    /**
+     * @param Config $config
+     * @throws Exception
+     */
+    public function console(Config $config)
+    {
+        $this->share($config);
+        $this->executeConsole($config->get('console_class'));
+    }
+
+    /**
+     * @param string|null $console_class
+     * @throws InjectionException
+     */
+    protected function executeConsole(?string $console_class)
+    {
+        if (!$console_class || !class_exists($console_class) || !is_subclass_of($console_class, Console::class)) {
+            $console_class = Console::class;
+        }
+        $this->execute([$console_class, 'run']);
     }
 
     /**

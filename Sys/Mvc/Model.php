@@ -13,12 +13,21 @@ use PDOStatement;
  */
 class Model
 {
-    private $table;
+    protected $table;
 
-    public static function instance(string $table)
+    /**
+     * Model constructor.
+     * @param string|null $table
+     */
+    public function __construct(?string $table = null)
     {
-        $model = new self();
-        return $model->setTable($table);
+        if (empty($table)) {
+            $className = get_class($this);
+            $arr = explode('\\', $className);
+            $tableClass = lcfirst(array_pop($arr));
+            $table = strtolower(preg_replace('/([A-Z])/', '_${1}', $tableClass));
+        }
+        $this->setTable($table);
     }
 
     protected function setTable(string $table)
@@ -29,13 +38,12 @@ class Model
 
     public function getTable()
     {
-        if (empty($this->table)) {
-            $className = get_class($this);
-            $arr = explode('\\', $className);
-            $tableClass = lcfirst(array_pop($arr));
-            $this->table = strtolower(preg_replace('/([A-Z])/', '_${1}', $tableClass));
-        }
         return $this->table;
+    }
+
+    public static function instance(string $table)
+    {
+        return new self($table);
     }
 
     /**
